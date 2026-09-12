@@ -17,7 +17,7 @@ FIRMS = {
 }
 
 st.set_page_config(
-    page_title="Workforce Portal - Sagar | Gemshine | Elite",
+    page_title="ESS PORTAL",
     page_icon="🏢",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -55,8 +55,7 @@ if not st.session_state['logged_in']:
     st.markdown("""
         <div style="text-align:center; margin-top:30px; margin-bottom:20px;">
             <div style="font-size:36px; color:#FF6B35;">❖</div>
-            <h2 style="color:#2D3748; margin:0;">Contract Labour ESS Portal</h2>
-            <p style="color:#718096; font-size:13px;">Sagar • Gemshine • Elite</p>
+            <h2 style="color:#2D3748; margin:0;">ESS PORTAL</h2>
         </div>
     """, unsafe_allow_html=True)
 
@@ -120,7 +119,7 @@ now_ist = datetime.now(IST)
 today_str = now_ist.strftime("%Y-%m-%d")
 now_time = now_ist.strftime("%I:%M:%S %p")
 
-# Site coordinates (SEZ Khed City default)
+# Default workplace coordinates (SEZ Khed City)
 site_lat, site_lon, allowed_radius = 18.843600, 73.918900, 75.0
 
 with engine.connect() as conn:
