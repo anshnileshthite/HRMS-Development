@@ -6,7 +6,7 @@ import hashlib
 from streamlit_js_eval import get_geolocation
 
 st.set_page_config(
-    page_title="GEMSHINE ENTERPRISES - HRMS",
+    page_title="GEMSHINE MULTISERVICES - HRMS",
     page_icon="🏢",
     layout="centered",
     initial_sidebar_state="collapsed"
