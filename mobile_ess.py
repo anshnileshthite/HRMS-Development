@@ -46,14 +46,22 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Modern OpportuneHR Clean UI Styling
+# Helper: Clean numbers and remove trailing '.0'
+def clean_val(val):
+    if val is None or str(val).strip() in ["", "0", "nan", "None"]:
+        return "N/A"
+    s = str(val).strip()
+    if s.endswith(".0"):
+        s = s[:-2]
+    return s
+
+# Styling
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     .stApp { background-color: #F8F9FB; }
     
-    /* Top Bar Header */
     .top-brand {
         display: flex;
         align-items: center;
@@ -64,7 +72,6 @@ st.markdown("""
     .brand-logo { font-size: 22px; color: #E85D04; font-weight: 800; }
     .brand-txt { font-size: 19px; font-weight: 700; color: #1E293B; letter-spacing: -0.5px; }
 
-    /* Orange Profile Banner */
     .profile-banner {
         background: linear-gradient(135deg, #FF6B35 0%, #F58220 100%);
         padding: 16px 20px;
@@ -76,7 +83,6 @@ st.markdown("""
     .user-name-title { font-size: 20px; font-weight: 700; margin: 0; }
     .user-desig-sub { font-size: 12px; opacity: 0.92; margin-top: 2px; }
 
-    /* Clean Card Container */
     .card-box {
         background: white;
         border-radius: 16px;
@@ -92,7 +98,6 @@ st.markdown("""
         margin-bottom: 14px;
     }
 
-    /* Attendance Mini Grid */
     .att-grid {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
@@ -104,13 +109,6 @@ st.markdown("""
     .att-header { font-size: 11px; color: #64748B; font-weight: 600; margin-bottom: 4px; }
     .att-value { font-weight: 700; color: #0F172A; }
 
-    /* Self Service Quick Action Icons */
-    .self-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-top: 10px;
-    }
     .action-button-tile {
         background: #FFFFFF;
         border-radius: 14px;
@@ -164,23 +162,22 @@ def generate_detailed_payslip_pdf(comp_name, comp_addr, s, emp):
 
     p.setFont("Helvetica-Bold", 9)
     p.drawString(40, h - 105, f"Employee Name: {emp.get('full_name', 'N/A')}")
-    p.drawString(220, h - 105, f"Employee ID: {s['emp_code']}")
+    p.drawString(220, h - 105, f"Employee ID: {clean_val(s['emp_code'])}")
     p.drawString(400, h - 105, f"Designation: {emp.get('category', 'Technician')}")
 
     p.setFont("Helvetica", 9)
     p.drawString(40, h - 122, f"Bank Name: {emp.get('bank_name', 'N/A')}")
-    p.drawString(220, h - 122, f"Account No: {emp.get('bank_account', 'N/A')}")
-    p.drawString(400, h - 122, f"IFSC Code: {emp.get('bank_ifsc', 'N/A')}")
+    p.drawString(220, h - 122, f"Account No: {clean_val(emp.get('bank_account'))}")
+    p.drawString(400, h - 122, f"IFSC Code: {clean_val(emp.get('bank_ifsc'))}")
 
-    p.drawString(40, h - 139, f"UAN No: {emp.get('uan_no', 'N/A')}")
-    p.drawString(220, h - 139, f"ESIC No: {emp.get('esic_no', 'N/A')}")
-    p.drawString(400, h - 139, f"PAN No: {emp.get('pan_no', 'N/A')}")
+    p.drawString(40, h - 139, f"UAN No: {clean_val(emp.get('uan_no'))}")
+    p.drawString(220, h - 139, f"ESIC No: {clean_val(emp.get('esic_no'))}")
+    p.drawString(400, h - 139, f"PAN No: {clean_val(emp.get('pan_no'))}")
 
     p.drawString(40, h - 156, f"Worked Days: {s.get('days_worked', 0)}")
     p.drawString(220, h - 156, f"Total Days: {s.get('total_days', 31)}")
     p.drawString(400, h - 156, f"OT Hours: {s.get('ot_hours', 0)}")
 
-    # Earnings & Deductions Box
     p.rect(35, h - 280, w - 70, 105)
     p.line(w / 2.0, h - 175, w / 2.0, h - 280)
     p.setFillColor(colors.HexColor("#F1F5F9"))
@@ -237,9 +234,7 @@ if 'logged_in' not in st.session_state:
     st.session_state['role'] = 'employee'
     st.session_state['current_page'] = "Home"
 
-# ==========================================
-# LOGIN SCREEN
-# ==========================================
+# Login Screen
 if not st.session_state['logged_in']:
     st.markdown("""
         <div style="text-align:center; margin-top:30px; margin-bottom:15px;">
@@ -280,7 +275,7 @@ company_id = st.session_state['company_id']
 firm_info = FIRMS[company_id]
 is_admin = (st.session_state['role'] == 'admin')
 
-# Read accurate employee details
+# Read employee profile
 with engine.connect() as conn:
     res = conn.execute(
         text("SELECT * FROM employees WHERE company_id = :cid AND emp_code = :c"),
@@ -291,9 +286,7 @@ with engine.connect() as conn:
 
 worker_name = emp_data.get("full_name", "Worker")
 
-# ==========================================
-# SIDEBAR DRAWER (Opportune Style Menu)
-# ==========================================
+# Drawer Sidebar
 with st.sidebar:
     st.markdown("""
         <div style="display:flex; align-items:center; gap:8px; padding-bottom:10px;">
@@ -337,7 +330,7 @@ with st.sidebar:
 page = st.session_state.get('current_page', "Home")
 
 # ==========================================
-# PAGE: HOME DASHBOARD
+# VIEW: HOME DASHBOARD
 # ==========================================
 if page == "Home":
     st.markdown("""
@@ -347,7 +340,6 @@ if page == "Home":
         </div>
     """, unsafe_allow_html=True)
 
-    # Orange Profile Banner
     st.markdown(f"""
         <div class="profile-banner">
             <div class="user-name-title">{worker_name} ({emp_code})</div>
@@ -355,7 +347,6 @@ if page == "Home":
         </div>
     """, unsafe_allow_html=True)
 
-    # Attendance Strip
     today_str = datetime.now(IST).strftime("%Y-%m-%d")
     with engine.connect() as conn:
         p_today = conn.execute(
@@ -381,7 +372,6 @@ if page == "Home":
         </div>
     """, unsafe_allow_html=True)
 
-    # Punch Clock Action
     loc = get_geolocation()
     user_in_range = False
     u_lat, u_lon = None, None
@@ -433,7 +423,7 @@ if page == "Home":
                 st.success("Punched Out successfully!")
                 st.rerun()
 
-    # Self Service Grid (No Leave Section)
+    # Self Service Grid
     st.markdown('<div class="card-title" style="margin-top:10px;">Self Service</div>', unsafe_allow_html=True)
     g1, g2, g3 = st.columns(3)
     with g1:
@@ -453,31 +443,35 @@ if page == "Home":
             st.rerun()
 
 # ==========================================
-# PAGE: MY PROFILE (Accurate Values)
+# VIEW: MY PROFILE (Clean Layout without .0)
 # ==========================================
 elif page == "Profile":
     if st.button("← Back to Home"):
         st.session_state['current_page'] = "Home"
         st.rerun()
 
-    st.markdown('<div class="card-title">My Profile & Verified Records</div>', unsafe_allow_html=True)
-    with st.container():
-        c1, c2 = st.columns(2)
-        c1.write(f"**Employee Name:** {emp_data.get('full_name', 'N/A')}")
-        c1.write(f"**Employee ID:** `{emp_code}`")
-        c1.write(f"**Designation / Category:** {emp_data.get('category', 'Technician')}")
-        c1.write(f"**Father's Name:** {emp_data.get('father_name', 'N/A')}")
+    st.markdown('<div class="card-title">My Profile & Employment Details</div>', unsafe_allow_html=True)
+    st.caption("Below are your verified records in the organization:")
 
-        c2.write(f"**Bank Name:** {emp_data.get('bank_name', 'N/A')}")
-        c2.write(f"**Account Number:** {emp_data.get('bank_account', 'N/A')}")
-        c2.write(f"**IFSC Code:** {emp_data.get('bank_ifsc', 'N/A')}")
-        c2.write(f"**UAN (PF Number):** {emp_data.get('uan_no', 'N/A')}")
+    c1, c2 = st.columns(2)
+    c1.markdown(f"**Employee Name:** {emp_data.get('full_name', 'N/A')}")
+    c1.markdown(f"**Employee ID:** `{emp_code}`")
+    c1.markdown(f"**Designation / Category:** {emp_data.get('category', 'Technician')}")
+    c1.markdown(f"**Father's Name:** {emp_data.get('father_name', 'N/A')}")
 
-        st.divider()
-        st.write(f"**ESIC Number:** {emp_data.get('esic_no', 'N/A')} | **PAN:** {emp_data.get('pan_no', 'N/A')}")
+    c2.markdown(f"**Bank Name:** {emp_data.get('bank_name', 'N/A')}")
+    c2.markdown(f"**Bank Account Number:** {clean_val(emp_data.get('bank_account'))}")
+    c2.markdown(f"**IFSC Code:** {clean_val(emp_data.get('bank_ifsc'))}")
+    c2.markdown(f"**UAN (PF Number):** {clean_val(emp_data.get('uan_no'))}")
+
+    st.divider()
+    c3, c4, c5 = st.columns(3)
+    c3.markdown(f"**ESIC Number:** {clean_val(emp_data.get('esic_no'))}")
+    c4.markdown(f"**PAN Number:** {clean_val(emp_data.get('pan_no'))}")
+    c5.markdown(f"**Aadhaar Number:** {clean_val(emp_data.get('aadhaar_no'))}")
 
 # ==========================================
-# PAGE: ATTENDANCE HISTORY
+# VIEW: ATTENDANCE (Daily, Monthly, Yearly Filters)
 # ==========================================
 elif page == "Attendance":
     if st.button("← Back to Home"):
@@ -485,18 +479,90 @@ elif page == "Attendance":
         st.rerun()
 
     st.title("Attendance Records")
-    with engine.connect() as conn:
-        df_att = pd.read_sql(text("""
-            SELECT punch_date as "Date", punch_in as "In Time", punch_out as "Out Time",
-                   COALESCE(ot_hours, 0) as "OT Hours", punch_status as "Status"
-            FROM daily_punches 
-            WHERE company_id = :cid AND emp_code = :c 
-            ORDER BY punch_date DESC
-        """), conn, params={"cid": company_id, "c": emp_code})
-    st.dataframe(df_att, use_container_width=True)
+    tab_d, tab_m, tab_y = st.tabs(["Daily Attendance", "Monthly Summary", "Yearly Overview"])
+
+    # 1. DAILY ATTENDANCE WITH DATE RANGE FILTER
+    with tab_d:
+        st.subheader("Filter by Date Range")
+        col_d1, col_d2 = st.columns(2)
+        cur_date = datetime.now(IST).date()
+        from_dt = col_d1.date_input("From Date", date(cur_date.year, cur_date.month, 1), key="d_from")
+        to_dt = col_d2.date_input("To Date", cur_date, key="d_to")
+
+        with engine.connect() as conn:
+            df_daily = pd.read_sql(text("""
+                SELECT punch_date as "Date", punch_in as "In Time", punch_out as "Out Time",
+                       COALESCE(ot_hours, 0) as "OT (Hrs)", punch_status as "Status"
+                FROM daily_punches 
+                WHERE company_id = :cid AND emp_code = :c 
+                  AND punch_date BETWEEN :d1 AND :d2
+                ORDER BY punch_date DESC
+            """), conn, params={"cid": company_id, "c": emp_code, "d1": str(from_dt), "d2": str(to_dt)})
+
+        if df_daily.empty:
+            st.info("No punch logs recorded between selected dates.")
+        else:
+            st.dataframe(df_daily, use_container_width=True)
+
+    # 2. MONTHLY ATTENDANCE WITH MONTH & YEAR SELECTOR
+    with tab_m:
+        st.subheader("Filter by Month & Year")
+        cm1, cm2 = st.columns(2)
+        months_dict = {
+            1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June",
+            7: "July", 8: "August", 9: "September", 10: "October", 11: "November", 12: "December"
+        }
+        sel_year = cm1.selectbox("Select Year", [2025, 2026, 2027], index=1, key="m_yr")
+        sel_month_name = cm2.selectbox("Select Month", list(months_dict.values()), index=cur_date.month - 1, key="m_mnth")
+        sel_month_num = [k for k, v in months_dict.items() if v == sel_month_name][0]
+        month_prefix = f"{sel_year}-{sel_month_num:02d}"
+
+        with engine.connect() as conn:
+            df_month = pd.read_sql(text("""
+                SELECT punch_date as "Date", punch_in as "In Time", punch_out as "Out Time",
+                       COALESCE(ot_hours, 0) as "OT (Hrs)", punch_status as "Status"
+                FROM daily_punches 
+                WHERE company_id = :cid AND emp_code = :c 
+                  AND punch_date LIKE :prefix
+                ORDER BY punch_date ASC
+            """), conn, params={"cid": company_id, "c": emp_code, "prefix": f"{month_prefix}%"})
+
+        tot_present = len(df_month)
+        tot_ot = df_month["OT (Hrs)"].sum() if not df_month.empty else 0.0
+
+        m1, m2 = st.columns(2)
+        m1.metric("Present Days in Month", tot_present)
+        m2.metric("Total OT Hours in Month", f"{tot_ot:.1f} hrs")
+
+        if not df_month.empty:
+            st.dataframe(df_month, use_container_width=True)
+        else:
+            st.info(f"No records found for {sel_month_name} {sel_year}.")
+
+    # 3. YEARLY ATTENDANCE SUMMARY
+    with tab_y:
+        st.subheader("Yearly Attendance Summary")
+        y_choice = st.selectbox("Select Year", [2025, 2026, 2027], index=1, key="y_choice")
+        with engine.connect() as conn:
+            df_year = pd.read_sql(text("""
+                SELECT SUBSTRING(punch_date, 6, 2) as "Month Num",
+                       count(*) as "Days Present",
+                       SUM(COALESCE(ot_hours, 0)) as "Total OT (Hrs)"
+                FROM daily_punches 
+                WHERE company_id = :cid AND emp_code = :c 
+                  AND punch_date LIKE :yr
+                GROUP BY SUBSTRING(punch_date, 6, 2)
+                ORDER BY "Month Num" ASC
+            """), conn, params={"cid": company_id, "c": emp_code, "yr": f"{y_choice}%"})
+
+        if df_year.empty:
+            st.info(f"No attendance records logged for year {y_choice}.")
+        else:
+            df_year["Month"] = df_year["Month Num"].apply(lambda x: months_dict.get(int(x), x))
+            st.dataframe(df_year[["Month", "Days Present", "Total OT (Hrs)"]], use_container_width=True)
 
 # ==========================================
-# PAGE: SALARY SLIPS
+# VIEW: SALARY SLIPS
 # ==========================================
 elif page == "Salary":
     if st.button("← Back to Home"):
@@ -504,21 +570,29 @@ elif page == "Salary":
         st.rerun()
 
     st.title("Salary Slips")
+    current_now = datetime.now(IST)
+
     with engine.connect() as conn:
-        slips = pd.read_sql(
+        all_slips = pd.read_sql(
             text("SELECT * FROM monthly_wages WHERE company_id = :cid AND emp_code = :c ORDER BY year DESC, month DESC"),
             conn,
             params={"cid": company_id, "c": emp_code}
         )
 
-    if slips.empty:
+    if all_slips.empty:
         st.info("No salary slips found.")
     else:
-        for _, s in slips.iterrows():
-            with st.expander(f"Month: {int(s['month']):02d}/{int(s['year'])} — Net Salary: ₹{s['net_wages']:,.2f}", expanded=True):
+        for _, s in all_slips.iterrows():
+            with st.expander(f"Payslip: {int(s['month']):02d}/{int(s['year'])} — Net Salary: ₹{float(s['net_wages']):,.2f}", expanded=True):
+                c1, c2 = st.columns(2)
+                c1.write(f"**Gross Salary:** ₹{float(s['gross_amount']):,.2f}")
+                c1.write(f"Days Worked: {s['days_worked']} | OT: {s.get('ot_hours', 0)}")
+                c2.write(f"**Total Deductions:** ₹{float(s['total_deduction']):,.2f}")
+                c2.write(f"**Net Take Home:** ₹{float(s['net_wages']):,.2f}")
+
                 pdf_data = generate_detailed_payslip_pdf(firm_info['name'], firm_info['address'], s, emp_data)
                 st.download_button(
-                    "📥 Download Salary Slip (PDF)",
+                    "📥 Download PDF Salary Slip",
                     pdf_data,
                     f"Payslip_{int(s['month'])}_{int(s['year'])}_{emp_code}.pdf",
                     "application/pdf",
@@ -526,7 +600,7 @@ elif page == "Salary":
                 )
 
 # ==========================================
-# PAGE: MY DOCUMENTS
+# VIEW: MY DOCUMENTS (Offer Letter & ESIC)
 # ==========================================
 elif page == "Docs":
     if st.button("← Back to Home"):
@@ -541,9 +615,9 @@ elif page == "Docs":
             b = base64.b64decode(emp_data["doc_offer_letter_b64"])
             st.download_button("⬇️ Download Offer Letter", b, f"Offer_Letter_{emp_code}.pdf", "application/pdf")
         else:
-            st.info("Offer letter will be uploaded by HR.")
+            st.info("Offer letter will be uploaded by HR upon joining.")
     with col2:
-        st.subheader("ESIC Card")
+        st.subheader("ESIC Pehchan Card")
         if emp_data.get("doc_esic_b64"):
             b = base64.b64decode(emp_data["doc_esic_b64"])
             st.download_button("⬇️ Download ESIC Card", b, f"ESIC_Card_{emp_code}.pdf", "application/pdf")
