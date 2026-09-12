@@ -98,7 +98,7 @@ if not st.session_state['logged_in']:
     st.markdown("""
         <div style="text-align: center; margin-top: 40px; margin-bottom: 25px;">
             <div style="font-size: 38px; color: #FF6B35;">❖</div>
-            <h2 style="color: #2D3748; margin-bottom: 0;">GEMSHINE ENTERPRISES</h2>
+            <h2 style="color: #2D3748; margin-bottom: 0;">GEMSHINE MULTISERVICES</h2>
             <p style="color: #718096; font-size: 14px;">Employee Self Service Portal</p>
         </div>
     """, unsafe_allow_html=True)
@@ -135,7 +135,7 @@ with st.sidebar:
     st.markdown("""
         <div style="padding: 10px 0; border-bottom: 1px solid #eee; margin-bottom: 15px;">
             <h3 style="color: #FF6B35; margin: 0;">❖ GEMSHINE</h3>
-            <p style="color: #666; font-size: 12px; margin: 0;">Enterprise HRMS Portal</p>
+            <p style="color: #666; font-size: 12px; margin: 0;">Gemshine Multiservices Portal</p>
         </div>
     """, unsafe_allow_html=True)
 
@@ -305,7 +305,7 @@ elif current_page in ["Personal Info", "Bank Account Details"]:
         st.write(f"**Full Name:** {emp['full_name']}")
         st.write(f"**Father Name:** {emp['father_name']}")
         st.write(f"**Designation / Category:** {emp['category']}")
-        st.write(f"**Aadhaar:** {emp['aadhaar_no'] or 'N/A'}")
+        st.write(f"**Aadhaar:** {'Available on File' if emp['aadhaar_no'] else 'N/A'}")
         st.write(f"**PAN:** {emp['pan_no'] or 'N/A'}")
         st.divider()
         st.subheader("Bank Details")
