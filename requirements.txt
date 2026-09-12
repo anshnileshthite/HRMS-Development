@@ -5,3 +5,4 @@ pytz
 streamlit-js-eval
 sqlalchemy
 pg8000
+reportlab
