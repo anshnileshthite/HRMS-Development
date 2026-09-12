@@ -6,7 +6,7 @@ import hashlib
 from streamlit_js_eval import get_geolocation
 
 st.set_page_config(
-    page_title="DAS SAGAR HRMS - ESS",
+    page_title="GEMSHINE ENTERPRISES - HRMS",
     page_icon="🏢",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -98,8 +98,8 @@ if not st.session_state['logged_in']:
     st.markdown("""
         <div style="text-align: center; margin-top: 40px; margin-bottom: 25px;">
             <div style="font-size: 38px; color: #FF6B35;">❖</div>
-            <h2 style="color: #2D3748; margin-bottom: 0;">DAS SAGAR ESS</h2>
-            <p style="color: #718096; font-size: 14px;">Self Service Mobile Portal</p>
+            <h2 style="color: #2D3748; margin-bottom: 0;">GEMSHINE ENTERPRISES</h2>
+            <p style="color: #718096; font-size: 14px;">Employee Self Service Portal</p>
         </div>
     """, unsafe_allow_html=True)
 
@@ -132,10 +132,10 @@ emp = cur.fetchone()
 
 # Navigation Drawer
 with st.sidebar:
-    st.markdown(f"""
+    st.markdown("""
         <div style="padding: 10px 0; border-bottom: 1px solid #eee; margin-bottom: 15px;">
-            <h3 style="color: #FF6B35; margin: 0;">❖ DAS SAGAR</h3>
-            <p style="color: #666; font-size: 12px; margin: 0;">We Make HR Easy • Khed City</p>
+            <h3 style="color: #FF6B35; margin: 0;">❖ GEMSHINE</h3>
+            <p style="color: #666; font-size: 12px; margin: 0;">Enterprise HRMS Portal</p>
         </div>
     """, unsafe_allow_html=True)
 
@@ -214,7 +214,7 @@ if current_page == "Home":
         elif today_punch['punch_in']:
             status_tag = '<span style="color: #34A853; font-weight: 600;">● Punched In</span>'
 
-    st.markdown(f"<p style='color:#718096; font-size:13px; margin:0;'>Current Time</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#718096; font-size:13px; margin:0;'>Current Time</p>", unsafe_allow_html=True)
     st.markdown(f"<p style='font-size:18px; font-weight:700; color:#2D3748; margin:4px 0;'>{now_time}</p>", unsafe_allow_html=True)
     st.markdown(status_tag, unsafe_allow_html=True)
 
